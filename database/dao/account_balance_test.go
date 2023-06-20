@@ -41,8 +41,8 @@ func TestAccountBalanceDAOSuite(t *testing.T) {
 	suite.Run(t, new(AccountBalanceDAOTestSuite))
 }
 
-func (suite *AccountBalanceDAOTestSuite) InsertAccountBalance(ab *model.AccountBalance) error {
-	stmt, err := suite.db.Prepare("INSERT INTO account_balances (account_id, balance, date_time) VALUES (?, ?, ?)")
+func (suite *AccountBalanceDAOTestSuite) InsertAccountBalance(tx *sql.Tx, ab *model.AccountBalance) error {
+	stmt, err := tx.Prepare("INSERT INTO account_balances (account_id, balance, date_time) VALUES (?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -54,35 +54,39 @@ func (suite *AccountBalanceDAOTestSuite) InsertAccountBalance(ab *model.AccountB
 }
 
 func (suite *AccountBalanceDAOTestSuite) TestFindAccountByID() {
-	dao := NewAccountBalanceDAO(suite.db)
-	_, err := dao.FindByAccountID("1")
+	tx, err := suite.db.Begin()
+	assert.Nil(suite.T(), err)
+	dao := NewAccountBalanceDAO()
+	_, err = dao.FindByAccountID(tx, "1")
 	assert.EqualError(suite.T(), err, "sql: no rows in result set")
 	ab := model.NewAccountBalance("1", 100, time.Now())
-	err = suite.InsertAccountBalance(ab)
+	err = suite.InsertAccountBalance(tx, ab)
 	assert.Nil(suite.T(), err)
-	ab, err = dao.FindByAccountID("1")
+	ab, err = dao.FindByAccountID(tx, "1")
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), "1", ab.AccountID)
 	assert.Equal(suite.T(), 100.0, ab.Balance)
 }
 
 func (suite *AccountBalanceDAOTestSuite) TestSave() {
-	ab := model.NewAccountBalance("1", 100, time.Now())
-	dao := NewAccountBalanceDAO(suite.db)
-	err := dao.Save(ab)
+	tx, err := suite.db.Begin()
 	assert.Nil(suite.T(), err)
-	ab, err = dao.FindByAccountID("1")
+	ab := model.NewAccountBalance("1", 100, time.Now())
+	dao := NewAccountBalanceDAO()
+	err = dao.Save(tx, ab)
+	assert.Nil(suite.T(), err)
+	ab, err = dao.FindByAccountID(tx, "1")
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), "1", ab.AccountID)
 	assert.Equal(suite.T(), 100.0, ab.Balance)
 	ab = model.NewAccountBalance("1", 200, time.Now())
-	err = dao.Save(ab)
+	err = dao.Save(tx, ab)
 	assert.Nil(suite.T(), err)
-	ab, err = dao.FindByAccountID("1")
+	ab, err = dao.FindByAccountID(tx, "1")
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), "1", ab.AccountID)
 	assert.Equal(suite.T(), 200.0, ab.Balance)
 	ab = model.NewAccountBalance("1", 150, time.Now().Add(-1*time.Hour))
-	err = dao.Save(ab)
+	err = dao.Save(tx, ab)
 	assert.EqualError(suite.T(), err, "newer balance already exists")
 }

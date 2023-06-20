@@ -9,18 +9,17 @@ import (
 )
 
 type AccountBalanceDAO struct {
-	db *sql.DB
 }
 
-func NewAccountBalanceDAO(db *sql.DB) *AccountBalanceDAO {
-	return &AccountBalanceDAO{db: db}
+func NewAccountBalanceDAO() *AccountBalanceDAO {
+	return &AccountBalanceDAO{}
 }
 
-func (a *AccountBalanceDAO) FindByAccountID(id string) (*model.AccountBalance, error) {
+func (a *AccountBalanceDAO) FindByAccountID(tx *sql.Tx, id string) (*model.AccountBalance, error) {
 	var balance float64
 	var dateTime time.Time
 
-	stmt, err := a.db.Prepare("SELECT balance, date_time FROM account_balances WHERE account_id = ?")
+	stmt, err := tx.Prepare("SELECT balance, date_time FROM account_balances WHERE account_id = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -33,19 +32,19 @@ func (a *AccountBalanceDAO) FindByAccountID(id string) (*model.AccountBalance, e
 	return model.NewAccountBalance(id, balance, dateTime), nil
 }
 
-func (a *AccountBalanceDAO) Save(m *model.AccountBalance) error {
-	existing, err := a.FindByAccountID(m.AccountID)
+func (a *AccountBalanceDAO) Save(tx *sql.Tx, m *model.AccountBalance) error {
+	existing, err := a.FindByAccountID(tx, m.AccountID)
 	if err != nil {
-		return a.insert(m)
+		return a.insert(tx, m)
 	}
 	if m.DateTime.Before(existing.DateTime) {
 		return fmt.Errorf("newer balance already exists")
 	}
-	return a.update(m)
+	return a.update(tx, m)
 }
 
-func (a *AccountBalanceDAO) insert(m *model.AccountBalance) error {
-	stmt, err := a.db.Prepare("INSERT INTO account_balances (account_id, balance, date_time) VALUES (?, ?, ?)")
+func (a *AccountBalanceDAO) insert(tx *sql.Tx, m *model.AccountBalance) error {
+	stmt, err := tx.Prepare("INSERT INTO account_balances (account_id, balance, date_time) VALUES (?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -57,8 +56,8 @@ func (a *AccountBalanceDAO) insert(m *model.AccountBalance) error {
 	return nil
 }
 
-func (a *AccountBalanceDAO) update(m *model.AccountBalance) error {
-	stmt, err := a.db.Prepare("UPDATE account_balances SET balance = ?, date_time = ? WHERE account_id = ?")
+func (a *AccountBalanceDAO) update(tx *sql.Tx, m *model.AccountBalance) error {
+	stmt, err := tx.Prepare("UPDATE account_balances SET balance = ?, date_time = ? WHERE account_id = ?")
 	if err != nil {
 		return err
 	}
