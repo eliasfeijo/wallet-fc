@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eliasfeijo/wallet-consumer-golang/database/model"
+	"github.com/eliasfeijo/wallet-fc/balances-ms/database/model"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -16,7 +16,7 @@ type AccountBalanceDAOTestSuite struct {
 	db *sql.DB
 }
 
-func (suite *AccountBalanceDAOTestSuite) SetupSuite() {
+func (suite *AccountBalanceDAOTestSuite) SetupTest() {
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		panic(err)
@@ -32,7 +32,7 @@ func (suite *AccountBalanceDAOTestSuite) SetupSuite() {
 	suite.db = db
 }
 
-func (suite *AccountBalanceDAOTestSuite) TearDownSuite() {
+func (suite *AccountBalanceDAOTestSuite) TearDownTest() {
 	suite.db.Exec("DROP TABLE account_balances")
 	suite.db.Close()
 }

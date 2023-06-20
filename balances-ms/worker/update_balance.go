@@ -6,9 +6,9 @@ import (
 	"log"
 
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/eliasfeijo/wallet-consumer-golang/database/dao"
-	"github.com/eliasfeijo/wallet-consumer-golang/database/model"
-	"github.com/eliasfeijo/wallet-consumer-golang/pkg/kafka"
+	"github.com/eliasfeijo/wallet-fc/balances-ms/database/dao"
+	"github.com/eliasfeijo/wallet-fc/balances-ms/database/model"
+	"github.com/eliasfeijo/wallet-fc/balances-ms/pkg/kafka"
 )
 
 type UpdateBalancePayload struct {

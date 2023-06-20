@@ -1,4 +1,4 @@
-module github.com/eliasfeijo/wallet-consumer-golang
+module github.com/eliasfeijo/wallet-fc/balances-ms
 
 go 1.20
 

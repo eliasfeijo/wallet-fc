@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eliasfeijo/wallet-consumer-golang/database/model"
+	"github.com/eliasfeijo/wallet-fc/balances-ms/database/model"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 )
