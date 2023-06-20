@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/eliasfeijo/wallet-fc/balances-ms/database/dao"
 	"github.com/eliasfeijo/wallet-fc/balances-ms/database/model"
 	"github.com/eliasfeijo/wallet-fc/balances-ms/worker"
 	"github.com/go-chi/chi/v5"
@@ -14,6 +16,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 )
+
+type AccountBalanceDTO struct {
+	Balance float64 `json:"balance"`
+}
 
 func main() {
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "localhost", "3307", "wallet_consumer"))
@@ -27,17 +33,38 @@ func main() {
 		seedDB(db)
 	}
 
+	dao := dao.NewAccountBalanceDAO()
+
 	balanceWorker := worker.NewUpdateBalanceWorker(db)
 	go balanceWorker.Work()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello world!"))
-	})
+	r.Get("/balances/{id}", getBalance(db, dao))
 
 	log.Println("Listening on port 3003")
 	http.ListenAndServe(":3003", r)
+}
+
+func getBalance(db *sql.DB, dao *dao.AccountBalanceDAO) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		accountId := chi.URLParam(r, "id")
+		tx, err := db.Begin()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Error getting balance"))
+			return
+		}
+		ab, err := dao.FindByAccountID(tx, accountId)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Error getting balance"))
+			return
+		}
+		dto := AccountBalanceDTO{Balance: ab.Balance}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(dto)
+	}
 }
 
 func seedDB(db *sql.DB) {
