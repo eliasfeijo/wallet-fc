@@ -2,6 +2,19 @@ FROM golang:1.20
 
 WORKDIR /app/
 
-RUN apt-get update && apt-get install -y librdkafka-dev
+RUN apt-get update && apt-get install -y wget librdkafka-dev
 
-CMD ["tail", "-f", "/dev/null"]
+ENV DOCKERIZE_VERSION v0.7.0
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY . .
+
+RUN go build -o wallet-core ./cmd/walletcore
+
+CMD ["./wallet-core"]

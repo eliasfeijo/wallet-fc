@@ -4,10 +4,9 @@ services:
   wallet: 
     build: ./wallet-core
     platform: linux/amd64
-    volumes:
-      - .:/app
     ports:
       - 8080:8080
+    command: dockerize -wait tcp://mysql:3306 -timeout 60s ./wallet-core
 
   mysql:
     image: mysql:5.7
@@ -19,7 +18,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - .docker/mysql:/var/lib/mysql
+      - ./wallet-core/.docker/mysql:/var/lib/mysql
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:6.1.0"
