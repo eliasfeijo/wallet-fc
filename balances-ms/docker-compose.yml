@@ -1,6 +1,13 @@
 version: '3.1'
 
 services:
+  balances: 
+    build: .
+    platform: linux/amd64
+    ports:
+      - 3003:3003
+    command: dockerize -wait tcp://mysql:3306 -timeout 60s ./balances-ms
+
   mysql:
     image: mysql:5.7
     platform: linux/amd64

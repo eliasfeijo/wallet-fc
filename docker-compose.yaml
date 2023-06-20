@@ -1,6 +1,25 @@
 version: '3.1'
 
 services:
+  balances: 
+    build: ./balances-ms
+    platform: linux/amd64
+    ports:
+      - 3003:3003
+    command: dockerize -wait tcp://mysql2:3306 -timeout 60s ./balances-ms
+
+  mysql2:
+    image: mysql:5.7
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: balances
+      MYSQL_PASSWORD: root
+    ports:
+      - 3307:3306
+    volumes:
+      - ./balances-ms/.docker/mysql:/var/lib/mysql
+
   wallet: 
     build: ./wallet-core
     platform: linux/amd64
