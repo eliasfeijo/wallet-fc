@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/internal/entity"
 )
 
 type AccountDB struct {

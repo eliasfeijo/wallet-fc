@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/usecase/create_transaction"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/internal/usecase/create_transaction"
 )
 
 type WebTransactionHandler struct {

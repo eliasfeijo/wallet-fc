@@ -3,8 +3,8 @@ package create_client
 import (
 	"time"
 
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/gateway"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/internal/entity"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/internal/gateway"
 )
 
 type CreateClientInputDTO struct {
@@ -21,12 +21,12 @@ type CreateClientOutputDTO struct {
 }
 
 type CreateClientUseCase struct {
-	ClientGateway   gateway.ClientGateway
+	ClientGateway gateway.ClientGateway
 }
 
 func NewCreateClientUseCase(clientGateway gateway.ClientGateway) *CreateClientUseCase {
 	return &CreateClientUseCase{
-		ClientGateway:   clientGateway,
+		ClientGateway: clientGateway,
 	}
 }
 

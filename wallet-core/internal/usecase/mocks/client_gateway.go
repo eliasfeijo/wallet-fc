@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/internal/entity"
 	"github.com/stretchr/testify/mock"
 )
 

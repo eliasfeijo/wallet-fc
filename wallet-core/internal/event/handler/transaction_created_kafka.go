@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com.br/devfullcycle/fc-ms-wallet/pkg/events"
-	"github.com.br/devfullcycle/fc-ms-wallet/pkg/kafka"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/pkg/events"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/pkg/kafka"
 )
 
 type TransactionCreatedKafkaHandler struct {

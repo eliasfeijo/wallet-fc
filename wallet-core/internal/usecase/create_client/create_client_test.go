@@ -3,7 +3,7 @@ package create_client
 import (
 	"testing"
 
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
+	"github.com/eliasfeijo/fc-wallet/wallet-core/internal/entity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
