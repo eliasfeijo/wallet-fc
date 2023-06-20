@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/eliasfeijo/wallet-fc/balances-ms/database/model"
+	"github.com/eliasfeijo/wallet-fc/balances-ms/worker"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/go-sql-driver/mysql"
@@ -25,6 +26,9 @@ func main() {
 	if !rows.Next() {
 		seedDB(db)
 	}
+
+	balanceWorker := worker.NewUpdateBalanceWorker(db)
+	go balanceWorker.Work()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

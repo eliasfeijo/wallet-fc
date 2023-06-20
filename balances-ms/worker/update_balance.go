@@ -18,6 +18,11 @@ type UpdateBalancePayload struct {
 	BalanceAccountIDTo   float64 `json:"balance_account_id_to"`
 }
 
+type MessageValue struct {
+	Name    string
+	Payload UpdateBalancePayload
+}
+
 type UpdateBalanceWorker struct {
 	db       *sql.DB
 	consumer *kafka.Consumer
@@ -26,7 +31,7 @@ type UpdateBalanceWorker struct {
 
 func NewUpdateBalanceWorker(db *sql.DB) *UpdateBalanceWorker {
 	consumer := kafka.NewConsumer(&ckafka.ConfigMap{
-		"bootstrap.servers": "kafka:29092",
+		"bootstrap.servers": "localhost:9092",
 		"group.id":          "wallet",
 	}, []string{"balances"})
 	dao := dao.NewAccountBalanceDAO()
@@ -38,22 +43,14 @@ func (u *UpdateBalanceWorker) Work() {
 	go u.consumer.Consume(messages)
 	for {
 		msg := <-messages
-		payload := UpdateBalancePayload{}
-		err := json.Unmarshal(msg.Value, &payload)
+		v := MessageValue{}
+		err := json.Unmarshal(msg.Value, &v)
 		if err != nil {
 			log.Printf("error unmarshalling message: %v", err)
 			continue
 		}
-		from := model.AccountBalance{
-			AccountID: payload.AccountIDFrom,
-			Balance:   payload.BalanceAccountIDFrom,
-			DateTime:  msg.Timestamp,
-		}
-		to := model.AccountBalance{
-			AccountID: payload.AccountIDTo,
-			Balance:   payload.BalanceAccountIDTo,
-			DateTime:  msg.Timestamp,
-		}
+		from := model.NewAccountBalance(v.Payload.AccountIDFrom, v.Payload.BalanceAccountIDFrom, msg.Timestamp)
+		to := model.NewAccountBalance(v.Payload.AccountIDTo, v.Payload.BalanceAccountIDTo, msg.Timestamp)
 		err = u.updateBalance(from, to)
 		if err != nil {
 			log.Printf("error updating balance: %v", err)
@@ -61,17 +58,20 @@ func (u *UpdateBalanceWorker) Work() {
 	}
 }
 
-func (u *UpdateBalanceWorker) updateBalance(from model.AccountBalance, to model.AccountBalance) error {
+func (u *UpdateBalanceWorker) updateBalance(from *model.AccountBalance, to *model.AccountBalance) error {
+	log.Println("updating balance")
+	log.Printf("from: %+v", from)
+	log.Printf("to: %+v", to)
 	tx, err := u.db.Begin()
 	if err != nil {
 		return err
 	}
-	err = u.dao.Save(tx, &from)
+	err = u.dao.Save(tx, from)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	err = u.dao.Save(tx, &to)
+	err = u.dao.Save(tx, to)
 	if err != nil {
 		tx.Rollback()
 		return err
