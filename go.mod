@@ -3,6 +3,7 @@ module github.com/eliasfeijo/wallet-consumer-golang
 go 1.20
 
 require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/stretchr/testify v1.8.4
 )
