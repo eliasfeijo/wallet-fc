@@ -31,7 +31,7 @@ type UpdateBalanceWorker struct {
 
 func NewUpdateBalanceWorker(db *sql.DB) *UpdateBalanceWorker {
 	consumer := kafka.NewConsumer(&ckafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
+		"bootstrap.servers": "kafka:29092",
 		"group.id":          "wallet",
 	}, []string{"balances"})
 	dao := dao.NewAccountBalanceDAO()

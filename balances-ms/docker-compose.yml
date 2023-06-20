@@ -13,7 +13,7 @@ services:
     platform: linux/amd64
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: wallet_consumer
+      MYSQL_DATABASE: balances
       MYSQL_PASSWORD: root
     ports:
       - 3307:3306
