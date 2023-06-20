@@ -3,9 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"net/http"
 	"time"
 
 	"github.com/eliasfeijo/wallet-fc/balances-ms/database/model"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 )
@@ -21,6 +25,15 @@ func main() {
 	if !rows.Next() {
 		seedDB(db)
 	}
+
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello world!"))
+	})
+
+	log.Println("Listening on port 3003")
+	http.ListenAndServe(":3003", r)
 }
 
 func seedDB(db *sql.DB) {
